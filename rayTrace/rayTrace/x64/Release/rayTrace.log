@@ -1,0 +1,7 @@
+﻿  main.cpp
+  Generating code
+  93 of 234 functions (39.7%) were compiled, the rest were copied from previous compilation.
+    80 functions were new in current compilation
+    16 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  rayTrace.vcxproj -> D:\RayTracing\RayTracing\rayTrace\x64\Release\rayTrace.exe
