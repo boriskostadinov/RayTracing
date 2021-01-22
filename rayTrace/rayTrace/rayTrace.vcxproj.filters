@@ -68,5 +68,8 @@
     <ClInclude Include="stb_image.h">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="aarect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
