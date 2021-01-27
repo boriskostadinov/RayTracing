@@ -6,7 +6,7 @@
 
 #include "hittable.h"
 #include "hittable_list.h"
-
+//          RM ALL HERE
 
 class bvh_node : public hittable {
     public:
