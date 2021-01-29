@@ -2,6 +2,7 @@
 //#include "ray.h"
 //#include "vec3.h"
 
+
 #include<fstream>
 
 #include "rtweekend.h"
@@ -14,6 +15,13 @@
 #include "aarect.h"
 
 #include <iostream>
+
+#define NOMINMAX
+
+// optix
+#include "primeCommon.h"
+#include <optixu/optixu_math_namespace.h>
+#include <sutil.h>
 
 /*
 // TODO*(boris): Add comment and Math here
@@ -154,6 +162,23 @@ hittable_list simple_light() {
 
 
 int main() {
+
+    RTPcontexttype contextType = RTP_CONTEXT_TYPE_CPU;
+    RTPbuffertype bufferType = RTP_BUFFER_TYPE_HOST;
+
+    //
+    // Create Prime context
+    //
+    RTPcontext context;
+    CHK_PRIME(rtpContextCreate(contextType, &context));
+
+
+    //
+    // cleanup
+    //
+    CHK_PRIME(rtpContextDestroy(context));
+// at bottom! 
+    
 
     // Image 
     /*

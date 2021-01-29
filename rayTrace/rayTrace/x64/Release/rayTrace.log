@@ -1,7 +1,8 @@
 ﻿  main.cpp
+  host_defines.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
   Generating code
-  2 of 637 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    8 functions had inline decision re-evaluated but remain unchanged
+  6 of 638 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    13 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   rayTrace.vcxproj -> D:\RayTracing\RayTracing\rayTrace\x64\Release\rayTrace.exe
