@@ -71,9 +71,9 @@ struct Hit
 {
   static const RTPbufferformat format = RTP_BUFFER_FORMAT_HIT_T_TRIID_U_V;
 
-  float t;
-  int   triId;
-  float u;
+  float t;      // ray lenght to hit 
+  int   triId;  // triangle index of intersection
+  float u;      //
   float v;
 };
 

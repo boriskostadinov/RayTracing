@@ -41,6 +41,8 @@ double hit_sphere(const point3& center, double radius, const ray& r) {
 }
 */
 
+auto material_global = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+
 
 color ray_color(const ray& r, const color& background, const hittable& world, int depth) {
     hit_record rec;
@@ -75,6 +77,78 @@ color ray_color(const ray& r, const color& background, const hittable& world, in
     return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
 
 }
+
+color rt_color(Hit h, Ray r, const color& background, PrimeMesh mesh) {
+    hit_record rec;
+    rec.t = h.t;
+    rec.u = h.u;
+    rec.v = h.v;
+    
+    rec.p = r.origin + r.dir * h.t;
+    //todo1;
+
+    int3* indices = mesh.getVertexIndices();
+    float3* vertices = mesh.getVertexData();
+
+
+    // calc normal and matherial
+    if (h.t < 0.0f)
+    {
+        return background;
+    }
+    else
+    {
+        int3 tri = indices[h.triId];
+        float3 v0 = vertices[tri.x];
+        float3 v1 = vertices[tri.y];
+        float3 v2 = vertices[tri.z];
+        float3 e0 = v1 - v0;
+        float3 e1 = v2 - v0;
+        float3 n = optix::normalize(optix::cross(e0, e1));
+
+        rec.normal = n;
+        rec.mat_ptr = material_global;
+
+        //R->r TODO
+
+        ray ray = r;
+
+        ray scattered;
+        color attenuation;
+        color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+        if (!rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
+            return emitted;
+
+        return emitted + attenuation;
+    }
+
+}
+
+// vec3 -> float3
+// ot optix
+float3 make_float3(const vec3 &vec) {
+    float3 f;
+    f.x = vec.x();
+    f.y = vec.y();
+    f.z = vec.z();
+    return f;
+}
+
+// float3 -> vec3
+// from optix
+vec3 make_vec3(const float3 &flo) {
+    vec3 v;
+    v.e[0] = flo.x;
+    v.e[1] = flo.y;
+    v.e[2] = flo.z;
+
+    return v;
+}
+
+//TODO
+
+// R to r
 
 // A very complex scene
 hittable_list random_scene() {
@@ -160,39 +234,23 @@ hittable_list simple_light() {
 }
 
 
-
 int main() {
 
-    RTPcontexttype contextType = RTP_CONTEXT_TYPE_CPU;
-    RTPbuffertype bufferType = RTP_BUFFER_TYPE_HOST;
-
-    //
-    // Create Prime context
-    //
-    RTPcontext context;
-    CHK_PRIME(rtpContextCreate(contextType, &context));
-
-
-    //
-    // cleanup
-    //
-    CHK_PRIME(rtpContextDestroy(context));
-// at bottom! 
-    
-
     // Image 
-    /*
+/*
+const auto aspect_ratio = 16.0 / 9.0;
+const int image_width = 400;
+const int image_height = static_cast<int>(image_width / aspect_ratio);
+const int samples_per_pixel = 100;
+const int max_depth = 50;
+*/
     const auto aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
-    const int max_depth = 50; 
-    */
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
-    //const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int samples_per_pixel = 400;
     const int max_depth = 50;
+
+
 
     // World
     /*hittable_list world;
@@ -317,6 +375,156 @@ int main() {
     int image_height = static_cast<int>(image_width / aspect_ratio);
 
     camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+
+
+
+    RTPcontexttype contextType = RTP_CONTEXT_TYPE_CPU;
+    RTPbuffertype bufferType = RTP_BUFFER_TYPE_HOST;
+
+    //
+    // Create Prime context
+    //
+    RTPcontext context;
+    CHK_PRIME(rtpContextCreate(contextType, &context));
+
+    std::string objFilename = std::string(sutil::samplesDir()) + "/data/cow.obj";
+    //std::string objFilename = "/data/cow.obj";
+
+    PrimeMesh mesh;
+    loadMesh(objFilename, mesh);
+
+    //
+    // Create buffers for geometry data 
+    //
+    RTPbufferdesc indicesDesc;
+    CHK_PRIME(rtpBufferDescCreate(
+        context,
+        RTP_BUFFER_FORMAT_INDICES_INT3,
+        RTP_BUFFER_TYPE_CUDA_LINEAR,
+        mesh.getVertexIndices(),
+        &indicesDesc)
+    );
+    CHK_PRIME(rtpBufferDescSetRange(indicesDesc, 0, mesh.num_triangles));
+
+
+    RTPbufferdesc verticesDesc;
+    CHK_PRIME(rtpBufferDescCreate(
+        context,
+        RTP_BUFFER_FORMAT_VERTEX_FLOAT3,
+        RTP_BUFFER_TYPE_CUDA_LINEAR,
+        mesh.getVertexData(),
+        &verticesDesc)
+    );
+    CHK_PRIME(rtpBufferDescSetRange(verticesDesc, 0, mesh.num_vertices));
+
+    //
+    // Create the Model object
+    //
+    RTPmodel model;
+    CHK_PRIME(rtpModelCreate(context, &model));
+    CHK_PRIME(rtpModelSetTriangles(model, indicesDesc, verticesDesc));
+    CHK_PRIME(rtpModelUpdate(model, 0));
+
+    //
+    // Create buffer for ray input 
+    //
+    RTPbufferdesc raysDesc;
+    Buffer<Ray> raysBuffer(size_t(image_width)*image_height*samples_per_pixel, bufferType, UNLOCKED); 	// unliocked here
+    
+    // vector ot vsi4ki rays
+    int index = 0;
+    for (int j = image_height - 1; j >= 0; --j) {
+        for (int i = 0; i < image_width; ++i) {
+            color pixel_color(0, 0, 0);
+            for (int s = 0; s < samples_per_pixel; ++s) {
+                auto u = (i + random_double()) / (image_width - 1);
+                auto v = (j + random_double()) / (image_height - 1);
+                ray r = cam.get_ray(u, v);
+                Ray Ray;
+
+                Ray.dir    = make_float3(r.dir);
+                Ray.origin = make_float3(r.orig);
+                Ray.tmin = 0;
+                Ray.tmax = 1e+10;
+                raysBuffer.ptr()[index] = Ray;
+                index++;
+                //pixel_color += ray_color(r, background, world, max_depth);
+            }
+        }
+    }
+
+
+
+    CHK_PRIME(rtpBufferDescCreate(
+        context,
+        Ray::format, /*RTP_BUFFER_FORMAT_RAY_ORIGIN_TMIN_DIRECTION_TMAX*/
+        raysBuffer.type(),
+        raysBuffer.ptr(),
+        &raysDesc)
+    );
+    CHK_PRIME(rtpBufferDescSetRange(raysDesc, 0, raysBuffer.count()));
+
+
+    //
+    // Create buffer for returned hit descriptions
+    //
+    RTPbufferdesc hitsDesc;
+    Buffer<Hit> hitsBuffer(raysBuffer.count(), bufferType, UNLOCKED);
+    CHK_PRIME(rtpBufferDescCreate(
+        context,
+        Hit::format, /*RTP_BUFFER_FORMAT_HIT_T_TRIID_U_V*/
+        hitsBuffer.type(),
+        hitsBuffer.ptr(),
+        &hitsDesc)
+    );
+    CHK_PRIME(rtpBufferDescSetRange(hitsDesc, 0, hitsBuffer.count()));
+
+
+    //
+    // Execute query
+    //
+    RTPquery query;
+    CHK_PRIME(rtpQueryCreate(model, RTP_QUERY_TYPE_CLOSEST, &query));
+    CHK_PRIME(rtpQuerySetRays(query, raysDesc));
+    CHK_PRIME(rtpQuerySetHits(query, hitsDesc));
+    CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
+
+
+    for (int i = 0; i < hitsBuffer.count(); i++) {
+        Hit h = hitsBuffer.ptr()[i];
+        Ray r = raysBuffer.ptr()[i];
+        rt_color(h, r);
+    }
+
+    //
+    // Shade the hit results to create image
+    //
+    std::vector<float3> image(width * height);
+    shadeHits(image, hitsBuffer, mesh);
+    writePpm("output.ppm", &image[0].x, width, height);
+
+    //
+    // re-execute query with different rays
+    //
+    float3 extents = mesh.getBBoxMax() - mesh.getBBoxMin();
+    translateRays(raysBuffer, extents * make_float3(0.2f, 0, 0));
+    CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
+    shadeHits(image, hitsBuffer, mesh);
+    freeMesh(mesh);
+    writePpm("outputTranslated.ppm", &image[0].x, width, height);
+
+
+
+
+    //
+    // cleanup
+    //
+    CHK_PRIME(rtpContextDestroy(context));
+    // at bottom! 
+    
+
+
+
 
 
     // Render
