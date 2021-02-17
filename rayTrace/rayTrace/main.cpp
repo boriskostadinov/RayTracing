@@ -388,7 +388,7 @@ const int max_depth = 50;
 */
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10.0;
-    int image_height = static_cast<int>(image_width / aspect_ratio);
+    //int image_height = static_cast<int>(image_width / aspect_ratio);
 
     camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
@@ -517,9 +517,10 @@ const int max_depth = 50;
     //
     // Shade the hit results to create image
     //
-    std::vector<float3> image(width * height);
+   
+    std::vector<float3> image(image_width * image_height);
     shadeHits(image, hitsBuffer, mesh);
-    writePpm("output.ppm", &image[0].x, width, height);
+    writePpm("output.ppm", &image[0].x, image_width, image_height);
 
     //
     // re-execute query with different rays
@@ -529,7 +530,7 @@ const int max_depth = 50;
     CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
     shadeHits(image, hitsBuffer, mesh);
     freeMesh(mesh);
-    writePpm("outputTranslated.ppm", &image[0].x, width, height);
+    writePpm("outputTranslated.ppm", &image[0].x, image_width, image_height);
 
 
 
@@ -546,7 +547,7 @@ const int max_depth = 50;
 
 
     // Render
-
+    /*
     std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
     // Outpitting the result directly into ppm file
@@ -570,4 +571,5 @@ const int max_depth = 50;
     }
 
     // std::cerr << "\nDone.\n";
+    */
 }

@@ -3,6 +3,15 @@
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(84,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(85,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(86,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(391,9): error C2373: 'image_height': redefinition; different type modifiers
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(265): message : see declaration of 'image_height'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(550,47): error C2088: '<<': illegal for class
+main.obj : error LNK2019: unresolved external symbol cudaGetErrorString referenced in function "public: void __cdecl Buffer<struct Hit>::alloc(unsigned __int64,enum RTPbuffertype,enum PageLockedState)" (?alloc@?$Buffer@UHit@@@@QEAAX_KW4RTPbuffertype@@W4PageLockedState@@@Z)
+main.obj : error LNK2019: unresolved external symbol cudaSetDevice referenced in function "public: void __cdecl Buffer<struct Hit>::free(void)" (?free@?$Buffer@UHit@@@@QEAAXXZ)
+main.obj : error LNK2019: unresolved external symbol cudaGetDevice referenced in function "public: void __cdecl Buffer<struct Hit>::alloc(unsigned __int64,enum RTPbuffertype,enum PageLockedState)" (?alloc@?$Buffer@UHit@@@@QEAAX_KW4RTPbuffertype@@W4PageLockedState@@@Z)
+main.obj : error LNK2019: unresolved external symbol cudaMalloc referenced in function "enum cudaError __cdecl cudaMalloc<struct Hit>(struct Hit * *,unsigned __int64)" (??$cudaMalloc@UHit@@@@YA?AW4cudaError@@PEAPEAUHit@@_K@Z)
+main.obj : error LNK2019: unresolved external symbol cudaFree referenced in function "public: void __cdecl Buffer<struct Hit>::free(void)" (?free@?$Buffer@UHit@@@@QEAAXXZ)
+main.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) void __cdecl freeMesh(struct Mesh &)" (__imp_?freeMesh@@YAXAEAUMesh@@@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) void __cdecl loadMesh(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &,struct Mesh &,float const *)" (__imp_?loadMesh@@YAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEAUMesh@@PEBM@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "void __cdecl translateRays(class Buffer<struct Ray> &,struct float3 const &)" (?translateRays@@YAXAEAV?$Buffer@URay@@@@AEBUfloat3@@@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "void __cdecl shadeHits(class std::vector<struct float3,class std::allocator<struct float3> > &,class Buffer<struct Hit> &,class PrimeMesh &)" (?shadeHits@@YAXAEAV?$vector@Ufloat3@@V?$allocator@Ufloat3@@@std@@@std@@AEAV?$Buffer@UHit@@@@AEAVPrimeMesh@@@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "void __cdecl writePpm(char const *,float const *,int,int)" (?writePpm@@YAXPEBDPEBMHH@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) char const * __cdecl sutil::samplesDir(void)" (__imp_?samplesDir@sutil@@YAPEBDXZ) referenced in function main
+D:\RayTracing\RayTracing\rayTrace\x64\Debug\rayTrace.exe : fatal error LNK1120: 11 unresolved externals
