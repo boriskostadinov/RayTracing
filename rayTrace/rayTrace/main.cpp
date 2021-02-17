@@ -78,14 +78,49 @@ color ray_color(const ray& r, const color& background, const hittable& world, in
 
 }
 
+// vec3 -> float3 ; to OptiX
+float3 make_float3(const vec3& vec) {
+    float3 f;
+    f.x = vec.x();
+    f.y = vec.y();
+    f.z = vec.z();
+    return f;
+}
+
+// float3 -> vec3 ; from OptiX
+vec3 make_vec3(const float3& fl3) {
+    vec3 v;
+    v.e[0] = fl3.x;
+    v.e[1] = fl3.y;
+    v.e[2] = fl3.z;
+
+    return v;
+}
+
+// R to r
+ray make_ray(const Ray& R) {
+    ray r;
+    r.origin() = make_vec3(R.origin);
+    r.direction() = make_vec3(R.dir);
+
+    return r;
+}
+
+
 color rt_color(Hit h, Ray r, const color& background, PrimeMesh mesh) {
     hit_record rec;
     rec.t = h.t;
     rec.u = h.u;
     rec.v = h.v;
     
-    rec.p = r.origin + r.dir * h.t;
+    //float3 checker = make_float3(rec.p);
+    //checker = r.origin + r.dir * h.t;
+    //rec.p = r.origin + r.dir * h.t;  // NEVER CHANGE
+
+    make_float3(rec.p) = r.origin + r.dir * h.t;
+
     //todo1;
+    vec3 re_checked = rec.p;
 
     int3* indices = mesh.getVertexIndices();
     float3* vertices = mesh.getVertexData();
@@ -106,18 +141,20 @@ color rt_color(Hit h, Ray r, const color& background, PrimeMesh mesh) {
         float3 e1 = v2 - v0;
         float3 n = optix::normalize(optix::cross(e0, e1));
 
-        rec.normal = n;
+        //rec.normal = n;
+        rec.normal = make_vec3(n);
         rec.mat_ptr = material_global;
 
         //R->r TODO
 
-        ray ray = r;
+        //ray ray = r;
+        ray r1 = make_ray(r);
 
         ray scattered;
         color attenuation;
         color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
-        if (!rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
+        if (!rec.mat_ptr->scatter(r1, rec, attenuation, scattered))
             return emitted;
 
         return emitted + attenuation;
@@ -125,30 +162,9 @@ color rt_color(Hit h, Ray r, const color& background, PrimeMesh mesh) {
 
 }
 
-// vec3 -> float3
-// ot optix
-float3 make_float3(const vec3 &vec) {
-    float3 f;
-    f.x = vec.x();
-    f.y = vec.y();
-    f.z = vec.z();
-    return f;
-}
 
-// float3 -> vec3
-// from optix
-vec3 make_vec3(const float3 &flo) {
-    vec3 v;
-    v.e[0] = flo.x;
-    v.e[1] = flo.y;
-    v.e[2] = flo.z;
 
-    return v;
-}
 
-//TODO
-
-// R to r
 
 // A very complex scene
 hittable_list random_scene() {
@@ -493,7 +509,9 @@ const int max_depth = 50;
     for (int i = 0; i < hitsBuffer.count(); i++) {
         Hit h = hitsBuffer.ptr()[i];
         Ray r = raysBuffer.ptr()[i];
-        rt_color(h, r);
+        background = color(0.70, 0.80, 1.00);
+
+        rt_color(h, r, background, mesh);
     }
 
     //

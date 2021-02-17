@@ -1,29 +1,8 @@
 ﻿  main.cpp
   host_defines.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(87,35): error C2679: binary '=': no operator found which takes a right-hand operand of type 'float3' (or there is no acceptable conversion)
-D:\RayTracing\RayTracing\rayTrace\rayTrace\vec3.h(64,1): message : could be 'vec3 &vec3::operator =(vec3 &&)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\vec3.h(64,1): message : or       'vec3 &vec3::operator =(const vec3 &)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(87,35): message : while trying to match the argument list '(point3, float3)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(109,23): error C2679: binary '=': no operator found which takes a right-hand operand of type 'float3' (or there is no acceptable conversion)
-D:\RayTracing\RayTracing\rayTrace\rayTrace\vec3.h(64,1): message : could be 'vec3 &vec3::operator =(vec3 &&)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\vec3.h(64,1): message : or       'vec3 &vec3::operator =(const vec3 &)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(109,23): message : while trying to match the argument list '(vec3, float3)'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(114,20): error C2440: 'initializing': cannot convert from 'Ray' to 'ray'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(114,17): message : No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(116,13): error C2146: syntax error: missing ';' before identifier 'scattered'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(116,13): error C2065: 'scattered': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(120,58): error C2065: 'scattered': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(132,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(133,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(134,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(375,9): error C2373: 'image_height': redefinition; different type modifiers
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(249): message : see declaration of 'image_height'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(496,22): error C2660: 'rt_color': function does not take 2 arguments
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(81,7): message : see declaration of 'rt_color'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(502,31): error C2065: 'width': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(502,39): error C2065: 'height': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(504,41): error C2065: 'width': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(504,48): error C2065: 'height': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(514,51): error C2065: 'width': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(514,58): error C2065: 'height': undeclared identifier
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(532,47): error C2088: '<<': illegal for class
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(84,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(85,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(86,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(391,9): error C2373: 'image_height': redefinition; different type modifiers
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(265): message : see declaration of 'image_height'
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(550,47): error C2088: '<<': illegal for class
