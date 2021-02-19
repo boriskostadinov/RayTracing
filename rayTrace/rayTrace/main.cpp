@@ -250,7 +250,7 @@ hittable_list simple_light() {
 
 
 int main() {
-
+	auto res = cudaSetDevice(0);
     // Image 
 /*
 const auto aspect_ratio = 16.0 / 9.0;
@@ -260,7 +260,7 @@ const int samples_per_pixel = 100;
 const int max_depth = 50;
 */
     const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 400;
+    const int image_width = 800;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int samples_per_pixel = 10;
     const int max_depth = 50;
@@ -392,17 +392,25 @@ const int max_depth = 50;
     //int image_height = static_cast<int>(image_width / aspect_ratio);
 
 
+	RTPcontexttype contextType;
+	RTPbuffertype bufferType;
+	int runOnCpu = 1;
+	if (runOnCpu) {
+		contextType = RTP_CONTEXT_TYPE_CPU;
+		bufferType = RTP_BUFFER_TYPE_HOST;
+	} else {
+		contextType = RTP_CONTEXT_TYPE_CUDA;
+		bufferType = RTP_BUFFER_TYPE_CUDA_LINEAR;
+	}
 
-
-    RTPcontexttype contextType = RTP_CONTEXT_TYPE_CPU;
-    RTPbuffertype bufferType = RTP_BUFFER_TYPE_HOST;
-
-    //
-    // Create Prime context
-    //
-    RTPcontext context;
-    CHK_PRIME(rtpContextCreate(contextType, &context));
-
+	RTPcontext context;
+	if (runOnCpu) {
+		CHK_PRIME(rtpContextCreate(contextType, &context));
+	} else {
+		CHK_PRIME(rtpContextCreate(contextType, &context));
+		const unsigned deviceNumbers[] = {0};
+		CHK_PRIME(rtpContextSetCudaDeviceNumbers(context, 1, deviceNumbers));
+	}
 
     std::string objFilename = "D:/RayTracing/RayTracing/rayTrace/rayTrace/data/cow.obj";
     //std::string objFilename = "/data/cow.obj";
@@ -410,12 +418,12 @@ const int max_depth = 50;
     PrimeMesh mesh;
     loadMesh(objFilename, mesh);
 
-	float3 extents = mesh.getBBoxMax() - mesh.getBBoxMin();
+	vec3 extents = make_vec3(mesh.getBBoxMax() - mesh.getBBoxMin());
 
-	lookfrom = vec3(mesh.getBBoxMax().x, mesh.getBBoxMax().y, mesh.getBBoxMax().z);
-	lookfrom = lookfrom - vec3(0.0,0.0,0.2);
+	lookfrom = vec3(mesh.getBBoxMin().x, mesh.getBBoxMin().y, mesh.getBBoxMin().z);
+	lookfrom = lookfrom - vec3(0.0,0.0, -extents.length()*2);
     lookat = vec3(mesh.getBBoxMin().x,mesh.getBBoxMin().y,mesh.getBBoxMin().z);
-	vup = unit_vector(cross(lookat-lookfrom, vec3(1,0,0)));
+	vup = -unit_vector(cross(lookat-lookfrom, vec3(1,0,0)));
 	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
     //
@@ -425,7 +433,7 @@ const int max_depth = 50;
     CHK_PRIME(rtpBufferDescCreate(
         context,
         RTP_BUFFER_FORMAT_INDICES_INT3,
-        RTP_BUFFER_TYPE_HOST,
+        bufferType,
         mesh.getVertexIndices(),
         &indicesDesc)
     );
@@ -436,7 +444,7 @@ const int max_depth = 50;
     CHK_PRIME(rtpBufferDescCreate(
         context,
         RTP_BUFFER_FORMAT_VERTEX_FLOAT3,
-        RTP_BUFFER_TYPE_HOST,
+        bufferType,
         mesh.getVertexData(),
         &verticesDesc)
     );
@@ -445,7 +453,6 @@ const int max_depth = 50;
     //
     // Create the Model object
     //
-    auto res = cudaSetDevice(0);
     RTPmodel model;
     CHK_PRIME(rtpModelCreate(context, &model));
     CHK_PRIME(rtpModelSetTriangles(model, indicesDesc, verticesDesc));
@@ -543,9 +550,27 @@ const int max_depth = 50;
             for (int s = 0; s < samples_per_pixel; ++s) {
 				const Hit &h = hitsBuffer.ptr()[asd++];
 				if (h.t > 0) {
-					pixel_color[0] += 1.f/samples_per_pixel;
+					int3* triangles = mesh.getVertexIndices();
+					int iv0 = triangles[h.triId].x;
+					int iv1 = triangles[h.triId].y;
+					int iv2 = triangles[h.triId].z;
+
+					float3* verts = mesh.getVertexData();
+					float3 A = verts[iv0];
+					float3 B = verts[iv1];
+					float3 C = verts[iv2];
+
+					vec3 AC = make_vec3(C-A);
+					vec3 AB = make_vec3(B-A);
+					
+					vec3 n = unit_vector(cross(AC,AB));
+					//float3 N = normalize(::cross(AB,AC));
+					pixel_color[0] = pixel_color[0]+abs(n[0]);
+					pixel_color[1] = pixel_color[1]+abs(n[1]);
+					pixel_color[2] = pixel_color[2]+abs(n[2]);
 				}
 			}
+			pixel_color /= samples_per_pixel;
 			write_color(file, pixel_color);
 		}
 	}
