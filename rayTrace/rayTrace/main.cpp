@@ -262,7 +262,7 @@ const int max_depth = 50;
     const auto aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 400;
+    const int samples_per_pixel = 10;
     const int max_depth = 50;
 
 
@@ -391,7 +391,6 @@ const int max_depth = 50;
     auto dist_to_focus = 10.0;
     //int image_height = static_cast<int>(image_width / aspect_ratio);
 
-    camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
 
 
@@ -410,6 +409,14 @@ const int max_depth = 50;
 
     PrimeMesh mesh;
     loadMesh(objFilename, mesh);
+
+	float3 extents = mesh.getBBoxMax() - mesh.getBBoxMin();
+
+	lookfrom = vec3(mesh.getBBoxMax().x, mesh.getBBoxMax().y, mesh.getBBoxMax().z);
+	lookfrom = lookfrom - vec3(0.0,0.0,0.2);
+    lookat = vec3(mesh.getBBoxMin().x,mesh.getBBoxMin().y,mesh.getBBoxMin().z);
+	vup = unit_vector(cross(lookat-lookfrom, vec3(1,0,0)));
+	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
     //
     // Create buffers for geometry data 
@@ -461,7 +468,7 @@ const int max_depth = 50;
                 ray r = cam.get_ray(u, v);
                 Ray Ray;
 
-                Ray.dir    = make_float3(r.dir);
+                Ray.dir    = make_float3(unit_vector(r.dir));
                 Ray.origin = make_float3(r.orig);
                 Ray.tmin = 0;
                 Ray.tmax = 1e+10;
@@ -517,12 +524,32 @@ const int max_depth = 50;
         Ray r = raysBuffer.ptr()[i];
        // color pixel_color(0.0, 0.0, 0.0);
 
-
       //  pixel_color = rt_color(h, r, background, mesh);
       //  write_rt_color(std::cout, pixel_color);
 
     }
 
+	    // Render
+    std::cout << "Writing results to file image123.ppm" << std::endl;
+
+    // Outpitting the result directly into ppm file
+    std::ofstream file("image123.ppm", std::ios::out);
+    file << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+	int asd = 0;
+	for (int j = image_height - 1; j >= 0; --j) {
+        //    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+        for (int i = 0; i < image_width; ++i) {
+            color pixel_color(0, 0, 0);
+            for (int s = 0; s < samples_per_pixel; ++s) {
+				const Hit &h = hitsBuffer.ptr()[asd++];
+				if (h.t > 0) {
+					pixel_color[0] += 1.f/samples_per_pixel;
+				}
+			}
+			write_color(file, pixel_color);
+		}
+	}
+    file.close();
 
     // Not included TODO: my render fx();
    
@@ -543,9 +570,8 @@ const int max_depth = 50;
     //
     // re-execute query with different rays
     //
-    float3 extents = mesh.getBBoxMax() - mesh.getBBoxMin();
     //translateRays(raysBuffer, extents * make_float3(0.2f, 0, 0));
-    CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
+    //CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
     //shadeHits(image, hitsBuffer, mesh);
     freeMesh(mesh);
     //writePpm("outputTranslated.ppm", &image[0].x, image_width, image_height);
