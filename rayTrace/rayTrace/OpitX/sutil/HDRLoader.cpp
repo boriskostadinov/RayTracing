@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -106,7 +106,7 @@ namespace {
       return ReadScanlineNoRLE(inf, RGBEline, wid); // Found an old-format scanline
     }
 
-    if(size_t(size_t(c2)<<8 | size_t(c3)) != wid) throw HDRError("Scanline width inconsistent");
+    if(size_t(size_t((unsigned char) c2)<<8 | size_t((unsigned char) c3)) != wid) throw HDRError("Scanline width inconsistent");
 
     // This scanline is RLE.
     for(unsigned int ch=0; ch<4; ch++) {
@@ -147,7 +147,7 @@ HDRLoader::HDRLoader( const std::string& filename )
     float exposure = 1.0f;
 
     std::getline(inf, magic);
-    if(magic != "#?RADIANCE") throw HDRError("File isn't Radiance.");
+    if(magic != "#?RADIANCE" && magic != "#?RGBE") throw HDRError("File isn't Radiance.");
     for (;;) {
       getLine(inf, comment);
 
@@ -242,8 +242,6 @@ optix::TextureSampler loadHDRTexture( optix::Context context,
   sampler->setIndexingMode( RT_TEXTURE_INDEX_NORMALIZED_COORDINATES );
   sampler->setReadMode( RT_TEXTURE_READ_NORMALIZED_FLOAT );
   sampler->setMaxAnisotropy( 1.0f );
-  sampler->setMipLevelCount( 1u );
-  sampler->setArraySize( 1u );
 
   // Read in HDR, set texture buffer to empty buffer if fails
   HDRLoader hdr( filename );
@@ -258,7 +256,7 @@ optix::TextureSampler loadHDRTexture( optix::Context context,
     buffer_data[3] = 1.0f;
     buffer->unmap();
 
-    sampler->setBuffer( 0u, 0u, buffer );
+    sampler->setBuffer( buffer );
     // Although it would be possible to use nearest filtering here, we chose linear
     // to be consistent with the textures that have been loaded from a file. This
     // allows OptiX to perform some optimizations.
@@ -289,7 +287,7 @@ optix::TextureSampler loadHDRTexture( optix::Context context,
 
   buffer->unmap();
 
-  sampler->setBuffer( 0u, 0u, buffer );
+  sampler->setBuffer( buffer );
   sampler->setFilteringModes( RT_FILTER_LINEAR, RT_FILTER_LINEAR, RT_FILTER_NONE );
 
   return sampler;

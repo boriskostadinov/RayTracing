@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,7 +41,7 @@
 #    if defined( _WIN32 ) || defined( _WIN64 )
 #      define SUTILAPI __declspec(dllexport) 
 #      define SUTILCLASSAPI
-#    elif defined( linux ) || defined( __linux ) || defined ( __CYGWIN__ )
+#    elif defined( linux ) || defined( __linux__ ) || defined ( __CYGWIN__ )
 #      define SUTILAPI __attribute__ ((visibility ("default")))
 #      define SUTILCLASSAPI SUTILAPI
 #    elif defined( __APPLE__ ) && defined( __MACH__ )
@@ -52,11 +52,12 @@
 #    endif
 
 #  else /* sutil_EXPORTS */
+#define SUTILAPI
 
-#    if defined( _WIN32 ) || defined( _WIN64 )
+/*#    if defined( _WIN32 ) || defined( _WIN64 )
 #      define SUTILAPI __declspec(dllimport)
 #      define SUTILCLASSAPI
-#    elif defined( linux ) || defined( __linux ) || defined ( __CYGWIN__ )
+#    elif defined( linux ) || defined( __linux__ ) || defined ( __CYGWIN__ )
 #      define SUTILAPI __attribute__ ((visibility ("default")))
 #      define SUTILCLASSAPI SUTILAPI
 #    elif defined( __APPLE__ ) && defined( __MACH__ )
@@ -64,7 +65,7 @@
 #      define SUTILCLASSAPI SUTILAPI
 #    else
 #      error "CODE FOR THIS OS HAS NOT YET BEEN DEFINED"
-#    endif
+#    endif*/
 
 #  endif /* sutil_EXPORTS */
 #endif

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,6 +50,13 @@
 //------------------------------------------------------------------------------
 struct OptiXMesh
 {
+  OptiXMesh()
+    : use_tri_api( true )
+    , ignore_mats( false )
+    , num_triangles( 0 )
+  {
+  }
+
   // Input
   optix::Context               context;       // required
   optix::Material              material;      // optional single matl override
@@ -59,6 +66,9 @@ struct OptiXMesh
   
   optix::Program               closest_hit;   // optional multi matl override
   optix::Program               any_hit;       // optional
+
+  bool                         use_tri_api;   // optional
+  bool                         ignore_mats;   // optional
 
   // Output
   optix::GeometryInstance      geom_instance;

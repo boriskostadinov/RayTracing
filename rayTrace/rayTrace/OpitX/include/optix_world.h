@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2010 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -58,21 +58,21 @@
 #endif
 #include "optix_gl_interop.h"
 #include "optixu/optixu.h"
-#include "optixu/optixu_traversal.h"
 
 #include "optixu/optixu_vector_types.h"
 #include "optixu/optixu_vector_functions.h"
 
 /* None of these headers are compatible with C */
 #if defined(__cplusplus)
-#  if !defined(__CUDACC__) || (CUDA_VERSION >= 3000)
-     /* CUDA < 3.0 has trouble with some of the C++ constructs used here. */
+#  if !defined(__CUDACC__)
 #    include "optixu/optixpp_namespace.h"
 #  endif
 #  include "optixu/optixu_math_namespace.h"
 #  include "optixu/optixu_aabb_namespace.h"
 #  include "optixu/optixu_matrix_namespace.h"
-#  include "optixu/optixu_math_stream_namespace.h"
+#  if !defined(__CUDACC_RTC__)
+#    include "optixu/optixu_math_stream_namespace.h"
+#  endif
 #endif
 
 #endif /* #ifndef __optixu_optixu_world_h__ */

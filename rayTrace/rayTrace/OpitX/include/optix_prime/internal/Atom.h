@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -28,9 +28,15 @@
 #  include <intrin.h>
 #  pragma intrinsic (_InterlockedExchangeAdd)
 #  pragma intrinsic (_InterlockedCompareExchange)
-#elif defined(__GNUC__) || defined(__ICC)
+typedef unsigned int atomic_word;
+#elif (defined(__GNUC__) && defined(__powerpc64__)) || defined(__ICC)
+#  include <ext/atomicity.h>
+typedef int atomic_word;
+#else
 #  define PRIME_ATOM32_GCC
+typedef unsigned int atomic_word;
 #endif
+
 
 namespace optix {
   namespace prime {
@@ -51,7 +57,7 @@ namespace optix {
       unsigned int operator--();
 
     private:
-      volatile unsigned int m_atom;
+      volatile atomic_word m_atom;
     };
 
 #if defined(PRIME_ATOM32_MSC)
@@ -68,6 +74,16 @@ namespace optix {
     //
     inline unsigned int Atom32::operator--() {
       return _InterlockedExchangeAdd(reinterpret_cast<volatile long *>(&m_atom),-1L) - 1L;
+    }
+
+#elif defined ( __GNUC__ ) && defined ( __powerpc64__) 
+
+    inline unsigned int Atom32::operator++() {
+      return (unsigned int)__gnu_cxx::__exchange_and_add( &m_atom, 1) + 1u;
+    }
+
+    inline unsigned int Atom32::operator--() {
+      return (unsigned int)__gnu_cxx::__exchange_and_add( &m_atom, -1) - 1u;
     }
 
 #elif defined(PRIME_ATOM32_GCC) // defined(PRIME_ATOM32_X86MSC)

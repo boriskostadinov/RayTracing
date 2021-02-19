@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2010 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -62,16 +62,6 @@ namespace optix {
   using ::type##3; \
   using ::type##4;
 
-/* Some types didn't exist until CUDA 3.0.  CUDA_VERSION isn't defined while
- * building CUDA code, so we also need to check the CUDART_VERSION value. */
-#if (CUDA_VERSION >= 3000) || (CUDART_VERSION >= 3000)
-#define RT_DEFINE_HELPER2(type) RT_DEFINE_HELPER(type)
-#else
-#define RT_DEFINE_HELPER2(type) \
-  using ::type##1; \
-  using ::type##2;
-#endif
-
 namespace optix {
 RT_DEFINE_HELPER(char)
 RT_DEFINE_HELPER(uchar)
@@ -82,14 +72,13 @@ RT_DEFINE_HELPER(uint)
 RT_DEFINE_HELPER(long)
 RT_DEFINE_HELPER(ulong)
 RT_DEFINE_HELPER(float)
-RT_DEFINE_HELPER2(longlong)
-RT_DEFINE_HELPER2(ulonglong)
-RT_DEFINE_HELPER2(double)
+RT_DEFINE_HELPER(longlong)
+RT_DEFINE_HELPER(ulonglong)
+RT_DEFINE_HELPER(double)
 using ::dim3;
 } /* end namespace optix */
 
 #undef RT_DEFINE_HELPER
-#undef RT_DEFINE_HELPER2
 
 #endif
 

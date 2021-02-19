@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -101,9 +101,13 @@ namespace optix {
       //
 
       /// Sets the CUDA devices used by a context.  See @ref rtpContextSetCudaDeviceNumbers
+      /// Note that this distribution can be rather costly if the rays are stored in device memory though.
+      /// For maximum efficiency it is recommended to only ever select one device per context.
       void setCudaDeviceNumbers( const std::vector<unsigned>& deviceNumbers );
 
       /// Sets the CUDA devices used by a context.  See @ref rtpContextSetCudaDeviceNumbers
+      /// Note that this distribution can be rather costly if the rays are stored in device memory though.
+      /// For maximum efficiency it is recommended to only ever select one device per context.
       void setCudaDeviceNumbers( unsigned deviceCount, const unsigned* deviceNumbers );
 
       /// Sets the number of CPU threads used by a CPU context. See @ref rtpContextSetCpuThreads

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -102,22 +102,25 @@ void unmap( MeshBuffers& buffers, Mesh& mesh )
 
 
 void createMaterialPrograms(
-    optix::Context         context,
-    bool                   use_textures,
-    optix::Program&        closest_hit,
-    optix::Program&        any_hit
+    optix::Context  context,
+    bool            use_textures,
+    optix::Program& closest_hit,
+    optix::Program& any_hit
     )
 {
-  const std::string path = std::string( sutil::samplesPTXDir() ) + 
-                          "/cuda_compile_ptx_generated_phong.cu.ptx";
-  const std::string closest_name = use_textures ?
-                                   "closest_hit_radiance_textured" :
-                                   "closest_hit_radiance";
+  const char *ptx = sutil::getPtxString( NULL, "phong.cu" );
 
+  // WARNING, if this material is going to be used by triangles as well as custom primitives,
+  // "closest_hit_radiance" and "closest_hit_radiance_textured" must be used.
+  // In this sample, the material is only used by one of them
   if( !closest_hit )
-      closest_hit = context->createProgramFromPTXFile( path, closest_name );
+  {
+    closest_hit = context->createProgramFromPTXString( ptx,
+      use_textures ? "closest_hit_radiance_textured" : "closest_hit_radiance" );
+  }
+
   if( !any_hit )
-      any_hit     = context->createProgramFromPTXFile( path, "any_hit_shadow" );
+    any_hit     = context->createProgramFromPTXString( ptx, "any_hit_shadow" );
 }
 
 
@@ -151,17 +154,19 @@ optix::Material createOptiXMaterial(
 
 optix::Program createBoundingBoxProgram( optix::Context context )
 {
-  std::string path = std::string( sutil::samplesPTXDir() ) +
-                     "/cuda_compile_ptx_generated_triangle_mesh.cu.ptx";
-  return context->createProgramFromPTXFile( path, "mesh_bounds" );
+  return context->createProgramFromPTXString( sutil::getPtxString( NULL, "triangle_mesh.cu" ), "mesh_bounds" );
 }
 
 
 optix::Program createIntersectionProgram( optix::Context context )
 {
-  std::string path = std::string( sutil::samplesPTXDir() ) +
-                     "/cuda_compile_ptx_generated_triangle_mesh.cu.ptx";
-  return context->createProgramFromPTXFile( path, "mesh_intersect" );
+  return context->createProgramFromPTXString( sutil::getPtxString( NULL, "triangle_mesh.cu" ), "mesh_intersect" );
+}
+
+
+optix::Program createAttributesProgram( optix::Context context )
+{
+  return context->createProgramFromPTXString( sutil::getPtxString( NULL, "triangle_mesh.cu" ), "mesh_attributes" );
 }
 
 
@@ -177,18 +182,45 @@ void translateMeshToOptiX(
   optix_mesh.num_triangles = mesh.num_triangles;
 
   std::vector<optix::Material> optix_materials;
-  if( optix_mesh.material )
+  if( optix_mesh.ignore_mats )
+  {
+    bool have_textures = false;
+    MaterialParams default_params = {
+        "", "",
+        { 0.7f, 0.7f, 0.7f },
+        { 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f },
+        1.0f
+    };
+
+    optix::Program closest_hit = optix_mesh.closest_hit;
+    optix::Program any_hit     = optix_mesh.any_hit;
+    createMaterialPrograms( ctx, have_textures, closest_hit, any_hit );
+
+    optix::Material mtl = createOptiXMaterial( ctx,
+                                               closest_hit,
+                                               any_hit,
+                                               default_params,
+                                               have_textures );
+
+    optix_materials.push_back( mtl );
+
+    // Rewrite all mat_indices to point to single override material
+    memset( mesh.mat_indices, 0, mesh.num_triangles*sizeof(int32_t) );
+  }
+  else if( optix_mesh.material )
   {
     // Rewrite all mat_indices to point to single override material
     memset( mesh.mat_indices, 0, mesh.num_triangles*sizeof(int32_t) );
 
-    optix_materials.push_back( optix_mesh.material ); 
+    optix_materials.push_back( optix_mesh.material );
   }
-  else 
+  else
   {
     bool have_textures = false;
     for( int32_t i = 0; i < mesh.num_materials; ++i )
-      if( !mesh.mat_params[i].Kd_map.empty() ) 
+      if( !mesh.mat_params[i].Kd_map.empty() )
         have_textures = true;
 
     optix::Program closest_hit = optix_mesh.closest_hit;
@@ -204,25 +236,53 @@ void translateMeshToOptiX(
             have_textures ) );
   }
 
-  optix::Geometry geometry = ctx->createGeometry();  
-  geometry[ "vertex_buffer"   ]->setBuffer( buffers.positions ); 
-  geometry[ "normal_buffer"   ]->setBuffer( buffers.normals); 
-  geometry[ "texcoord_buffer" ]->setBuffer( buffers.texcoords ); 
-  geometry[ "material_buffer" ]->setBuffer( buffers.mat_indices); 
-  geometry[ "index_buffer"    ]->setBuffer( buffers.tri_indices); 
-  geometry->setPrimitiveCount     ( mesh.num_triangles );
-  geometry->setBoundingBoxProgram ( optix_mesh.bounds ?
-                                    optix_mesh.bounds :
-                                    createBoundingBoxProgram( ctx ) );
-  geometry->setIntersectionProgram( optix_mesh.intersection ?
-                                    optix_mesh.intersection :
-                                    createIntersectionProgram( ctx ) );
+  if( optix_mesh.use_tri_api )
+  {
+    optix::GeometryTriangles geom_tri = ctx->createGeometryTriangles();
+    geom_tri->setPrimitiveCount( mesh.num_triangles );
+    geom_tri->setTriangleIndices( buffers.tri_indices, RT_FORMAT_UNSIGNED_INT3 );
+    geom_tri->setVertices( mesh.num_vertices, buffers.positions, buffers.positions->getFormat() );
+    geom_tri->setBuildFlags( RTgeometrybuildflags(0) );
+    geom_tri->setAttributeProgram( createAttributesProgram( ctx ) );
 
-  optix_mesh.geom_instance = ctx->createGeometryInstance(
-                                 geometry,
-                                 optix_materials.begin(),
-                                 optix_materials.end()
-                                 );
+    size_t num_matls = optix_materials.size();
+    geom_tri->setMaterialCount( static_cast<unsigned int>( num_matls ) );
+    geom_tri->setMaterialIndices( buffers.mat_indices, 0, sizeof( unsigned ), RT_FORMAT_UNSIGNED_INT );
+
+    optix_mesh.geom_instance = ctx->createGeometryInstance();
+    optix_mesh.geom_instance->setGeometryTriangles( geom_tri );
+
+    // Set the materials
+    optix_mesh.geom_instance->setMaterialCount( static_cast<unsigned int>( num_matls ) );
+    for( unsigned int idx = 0; idx < static_cast<unsigned int>( num_matls ); ++idx )
+    {
+      optix_mesh.geom_instance->setMaterial( idx, optix_materials[idx] );
+    }
+  }
+  else
+  {
+    optix::Geometry geometry = ctx->createGeometry();
+    geometry->setPrimitiveCount     ( mesh.num_triangles );
+    geometry->setBoundingBoxProgram ( optix_mesh.bounds ?
+                                      optix_mesh.bounds :
+                                      createBoundingBoxProgram( ctx ) );
+    geometry->setIntersectionProgram( optix_mesh.intersection ?
+                                      optix_mesh.intersection :
+                                      createIntersectionProgram( ctx ) );
+
+    optix_mesh.geom_instance = ctx->createGeometryInstance(
+      geometry,
+      optix_materials.begin(),
+      optix_materials.end()
+      );
+  }
+
+  // Put these on the GeometryInstance, not Geometry, to be compatible with the Triangle API.
+  optix_mesh.geom_instance[ "vertex_buffer"   ]->setBuffer( buffers.positions   );
+  optix_mesh.geom_instance[ "normal_buffer"   ]->setBuffer( buffers.normals     );
+  optix_mesh.geom_instance[ "texcoord_buffer" ]->setBuffer( buffers.texcoords   );
+  optix_mesh.geom_instance[ "index_buffer"    ]->setBuffer( buffers.tri_indices );
+  optix_mesh.geom_instance[ "material_buffer" ]->setBuffer( buffers.mat_indices );
 }
 
 

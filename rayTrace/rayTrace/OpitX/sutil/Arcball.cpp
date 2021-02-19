@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 
 using namespace optix;
 
+namespace sutil
+{
 
 namespace
 {
@@ -273,14 +275,13 @@ inline Matrix4x4 Quaternion::rotationMatrix() const
 
 } // namespace
 
-
 //------------------------------------------------------------------------------
 //
 // Arcball implementation
 //
 //------------------------------------------------------------------------------
 
-float3 sutil::Arcball::toSphere(const float2& v) const
+float3 Arcball::toSphere(const float2& v) const
 {
   float x = (v.x - m_center.x) / m_radius;
   float y = (1.0f - v.y - m_center.y) / m_radius;
@@ -299,7 +300,7 @@ float3 sutil::Arcball::toSphere(const float2& v) const
 }
 
 
-Matrix4x4 sutil::Arcball::rotate(const float2& from, const float2& to) const
+SUTILAPI Matrix4x4 Arcball::rotate(const float2& from, const float2& to) const
 {
   float3 a = toSphere( from );
   float3 b = toSphere( to );
@@ -310,3 +311,4 @@ Matrix4x4 sutil::Arcball::rotate(const float2& from, const float2& to) const
   return q.rotationMatrix();
 }
 
+} // namespace sutil

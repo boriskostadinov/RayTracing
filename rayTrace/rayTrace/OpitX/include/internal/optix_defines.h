@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2008 - 2009 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -82,7 +82,7 @@ namespace optix {
   
 
 
-#if defined(__x86_64) || defined(AMD64) || defined(_M_AMD64)
+#if defined(__x86_64) || defined(AMD64) || defined(_M_AMD64) || defined(__powerpc64__)
 #define OPTIX_ASM_PTR          "l"
 #define OPTIX_ASM_SIZE_T       "l"
 #define OPTIX_ASM_PTR_SIZE_STR "64"

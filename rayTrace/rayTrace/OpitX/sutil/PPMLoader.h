@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,6 +66,8 @@ public:
                                               const optix::float3& default_color,
                                               bool linearize_gamma = false);
 
+  SUTILAPI optix::Buffer loadFloat4Buffer( optix::Context context, bool linearize_gamma = false );
+
   SUTILAPI bool           failed() const;
   SUTILAPI unsigned int   width() const;
   SUTILAPI unsigned int   height() const;
@@ -78,6 +80,10 @@ private:
   unsigned char* m_raster;
   bool           m_is_ascii;
 
-  static void getLine( std::ifstream& file_in, std::string& s );
+  // lookup table for sRGB gamma linearization
+  static unsigned char s_srgb2linear[256];
+  static bool s_srgb2linear_initialized;
 
+  static void getLine( std::ifstream& file_in, std::string& s );
+  static void init_srgb2linear();
 };

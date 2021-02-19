@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,16 +30,18 @@
 #pragma once
 
 #include <optixu/optixpp_namespace.h>
+
+#include <stdlib.h>
 #include <vector>
 
 #include "sutilapi.h"
 
 
 // Default catch block
-#define SUTIL_CATCH( ctx ) catch( sutil::APIError& e ) {           \
+#define SUTIL_CATCH( ctx ) catch( const sutil::APIError& e ) {     \
     sutil::handleError( ctx, e.code, e.file.c_str(), e.line );     \
   }                                                                \
-  catch( std::exception& e ) {                                     \
+  catch( const std::exception& e ) {                               \
     sutil::reportErrorMessage( e.what() );                         \
     exit(1);                                                       \
   }
@@ -52,6 +54,12 @@
       throw sutil::APIError( code, __FILE__, __LINE__ );           \
   } while(0)
 
+enum bufferPixelFormat
+{
+    BUFFER_PIXEL_FORMAT_DEFAULT, // The default depending on the buffer type
+    BUFFER_PIXEL_FORMAT_RGB,     // The buffer is RGB or RGBA
+    BUFFER_PIXEL_FORMAT_BGR,     // The buffer is BGR or BGRA
+};
 
 namespace sutil
 {
@@ -85,13 +93,25 @@ SUTILAPI const char* samplesDir();
 // The pointer returned may point to a static array.
 SUTILAPI const char* samplesPTXDir();
 
+// Query directory containing CUDA files for NVRTC to compile at runtime.
+// The pointer returned may point to a static array.
+SUTILAPI const char* samplesCUDADir();
+
 // Create an output buffer with given specifications
 optix::Buffer SUTILAPI createOutputBuffer(
         optix::Context context,             // optix context
         RTformat format,                    // Pixel format (must be ubyte4 for pbo)
         unsigned width,                     // Buffer width
         unsigned height,                    // Buffer height
-        bool use_pbo );                     // Use GL interop PBO
+        bool use_pbo);                      // Buffer type                    
+
+// Create an input/output buffer with given specifications
+optix::Buffer SUTILAPI createInputOutputBuffer(
+    optix::Context context,             // optix context
+    RTformat format,                    // Pixel format (must be ubyte4 for pbo)
+    unsigned width,                     // Buffer width
+    unsigned height,                    // Buffer height
+    bool use_pbo);                      // Buffer type                    
 
 // Resize a Buffer and its underlying GLBO if necessary
 void SUTILAPI resizeBuffer(
@@ -116,22 +136,28 @@ void SUTILAPI displayBufferGlut(
 
 // Write the contents of the Buffer to a PPM image file
 void SUTILAPI displayBufferPPM(
-        const char* filename,               // Image file to be created
-        optix::Buffer buffer);              // Buffer to be displayed
+        const char* filename,                 // Image file to be created
+        optix::Buffer buffer,                 // Buffer to be displayed
+        bool disable_srgb_conversion = true); // Enables/disables srgb conversion before the image is saved. Disabled by default.            
 
 // Write the contents of the Buffer to a PPM image file (C API version).
 void SUTILAPI displayBufferPPM(
-        const char* filename,               // Image file to be created
-        RTbuffer buffer);                   // Buffer to be displayed
-
+        const char* filename,                 // Image file to be created
+        RTbuffer buffer,                      // Buffer to be displayed
+        bool disable_srgb_conversion = true); // Enables/disables srgb conversion before the image is saved. Disabled by default.            
 
 // Display contents of buffer, where the OpenGL/GLUT context is managed by caller.
 void SUTILAPI displayBufferGL(
-        optix::Buffer buffer ); // Buffer to be displayed
-        
+        optix::Buffer buffer,       // Buffer to be displayed
+        bufferPixelFormat format = BUFFER_PIXEL_FORMAT_DEFAULT, // The pixel format of the buffer or 0 to use the default for the pixel type
+        bool disable_srgb_conversion = false);
+
 // Display frames per second, where the OpenGL/GLUT context
 // is managed by the caller.
 void SUTILAPI displayFps( unsigned total_frame_count );
+
+// Display a short string starting at x,y.
+void SUTILAPI displayText(const char* text, float x, float y);
 
 // Create on OptiX TextureSampler for the given image file.  If the filename is
 // empty or if loading the file fails, return 1x1 texture with default color.
@@ -139,6 +165,12 @@ optix::TextureSampler SUTILAPI loadTexture(
         optix::Context context,             // Context used for object creation 
         const std::string& filename,        // File to load
         optix::float3 default_color);       // Default color in case of file failure
+
+
+// Create an OptiX Buffer for the given image file.  If the file load fails, 
+// a null pointer is returned.
+optix::Buffer SUTILAPI loadPPMFloat4Buffer( optix::Context     context,     // Context used for object creation
+                                            const std::string& filename );  // File to load
 
 
 // Creates a Buffer object for the given cubemap files.
@@ -171,6 +203,22 @@ void SUTILAPI parseDimensions(
 
 // Get current time in seconds for benchmarking/timing purposes.
 double SUTILAPI currentTime();
+
+// Get PTX, either pre-compiled with NVCC or JIT compiled by NVRTC.
+SUTILAPI const char* getPtxString(
+        const char* sample,                 // Name of the sample, used to locate the input file. NULL = only search the common /cuda dir
+        const char* filename,               // Cuda C input file name
+        const char** log = NULL );          // (Optional) pointer to compiler log string. If *log == NULL there is no output. Only valid until the next getPtxString call
+
+// Ensures that width and height have the minimum size to prevent launch errors.
+void SUTILAPI ensureMinimumSize(
+    int& width,                             // Will be assigned the minimum suitable width if too small.
+    int& height);                           // Will be assigned the minimum suitable height if too small.
+
+// Ensures that width and height have the minimum size to prevent launch errors.
+void SUTILAPI ensureMinimumSize(
+    unsigned& width,                        // Will be assigned the minimum suitable width if too small.
+    unsigned& height);                      // Will be assigned the minimum suitable height if too small.
 
 } // end namespace sutil
 

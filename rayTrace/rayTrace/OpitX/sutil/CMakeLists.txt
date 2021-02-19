@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,7 +27,7 @@
 #
 
 set(sources
-  ${SAMPLES_CUDA_DIR}/commonStructs.h
+  ${SAMPLES_CUDA_DIR}/common.h
   ${SAMPLES_CUDA_DIR}/helpers.h
   ${SAMPLES_CUDA_DIR}/intersection_refinement.h
   ${SAMPLES_CUDA_DIR}/phong.h
@@ -71,7 +71,7 @@ if(OPENGL_FOUND AND NOT APPLE)
     set_source_files_properties("glew.c" PROPERTIES COMPILE_FLAGS  "-Wno-strict-prototypes -Wno-missing-prototypes")
 
   endif()
-  
+
 endif()
 
 if(GLUT_FOUND AND OPENGL_FOUND)
@@ -82,19 +82,25 @@ endif()
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-# For commonStructs.h
+# For common.h
 include_directories(${SAMPLES_CUDA_DIR})
 
 # Compile the cuda files to ptx.  Note that this will ignore all of the non CUDA
 # files.
-CUDA_COMPILE_PTX(ptx_files ${sources})
+if(NOT CUDA_NVRTC_ENABLED)
+  CUDA_COMPILE_PTX(ptx_files ${sources})
+endif()
 
 # Make the library.
 set(sutil_target "sutil_sdk")
-add_library(${sutil_target} ${sources} ${ptx_files})
+if(CUDA_NVRTC_ENABLED)
+  add_library(${sutil_target} ${sources})
+else()
+  add_library(${sutil_target} ${sources} ${ptx_files})
+endif()
 
-# Use gcc rather than g++ to link if we are linking statically against libgcc_s and libstdc++
 if(USING_GNU_C OR USING_GNU_CXX)
+  # Use gcc rather than g++ to link if we are linking statically against libgcc_s and libstdc++
   if(GCC_LIBSTDCPP_HACK)
     set_target_properties(${sutil_target} PROPERTIES LINKER_LANGUAGE "C")
     target_link_libraries(${sutil_target} LINK_PRIVATE ${STATIC_LIBSTDCPP})
@@ -105,10 +111,12 @@ endif()
 # these variable will be empty.
 target_link_libraries(${sutil_target}
   optix
-  optixu
   ${GLUT_LIBRARIES}
   ${OPENGL_LIBRARIES}
   )
+if(CUDA_NVRTC_ENABLED)
+  target_link_libraries(${sutil_target}  ${CUDA_nvrtc_LIBRARY})
+endif()
 if(WIN32)
   target_link_libraries(${sutil_target} winmm.lib)
 endif()
@@ -131,6 +139,25 @@ if(WIN32)
     )
 endif()
 
+# Make the list of sources available to the parent directory for installation needs.
+set(sutil_sources "${sources}" PARENT_SCOPE)
+
+set_property(TARGET ${sutil_target} PROPERTY FOLDER "${OPTIX_IDE_FOLDER}")
+
+#######################################
+#######################################
+#######################################
+
+#    ONLY INSTALL COMMANDS BELOW      #
+
+#######################################
+#######################################
+#######################################
+
+if( OPTIX_BUILD_7_SDK_PACKAGE )
+  return()
+endif()
+
 if(RELEASE_INSTALL_BINARY_SAMPLES AND NOT RELEASE_STATIC_BUILD)
   # If performing a release install, we want to use rpath for our install name.
   # The executables' rpaths will then be set to @executable_path so we can invoke
@@ -144,6 +171,3 @@ if(RELEASE_INSTALL_BINARY_SAMPLES AND NOT RELEASE_STATIC_BUILD)
     LIBRARY DESTINATION ${SDK_BINARY_INSTALL_DIR}
     )
 endif()
-
-# Make the list of sources available to the parent directory for installation needs.
-set(sutil_sources "${sources}" PARENT_SCOPE)

@@ -119,7 +119,6 @@ color rt_color(Hit h, Ray r, const color& background, PrimeMesh mesh) {
 
     make_float3(rec.p) = r.origin + r.dir * h.t;
 
-    //todo1;
     vec3 re_checked = rec.p;
 
     int3* indices = mesh.getVertexIndices();
@@ -356,7 +355,6 @@ const int max_depth = 50;
         vfov = 20.0;
         break;
 
-    default:
     case 5:
         world = simple_light();
         //samples_per_pixel = 400;
@@ -365,6 +363,9 @@ const int max_depth = 50;
         lookat = point3(0, 2, 0);
         vfov = 20.0;
         break;
+    default:
+        break;
+
     }
 
     // Camera
@@ -403,7 +404,8 @@ const int max_depth = 50;
     RTPcontext context;
     CHK_PRIME(rtpContextCreate(contextType, &context));
 
-    std::string objFilename = std::string(sutil::samplesDir()) + "/data/cow.obj";
+
+    std::string objFilename = "D:/RayTracing/RayTracing/rayTrace/rayTrace/data/cow.obj";
     //std::string objFilename = "/data/cow.obj";
 
     PrimeMesh mesh;
@@ -416,7 +418,7 @@ const int max_depth = 50;
     CHK_PRIME(rtpBufferDescCreate(
         context,
         RTP_BUFFER_FORMAT_INDICES_INT3,
-        RTP_BUFFER_TYPE_CUDA_LINEAR,
+        RTP_BUFFER_TYPE_HOST,
         mesh.getVertexIndices(),
         &indicesDesc)
     );
@@ -427,7 +429,7 @@ const int max_depth = 50;
     CHK_PRIME(rtpBufferDescCreate(
         context,
         RTP_BUFFER_FORMAT_VERTEX_FLOAT3,
-        RTP_BUFFER_TYPE_CUDA_LINEAR,
+        RTP_BUFFER_TYPE_HOST,
         mesh.getVertexData(),
         &verticesDesc)
     );
@@ -436,6 +438,7 @@ const int max_depth = 50;
     //
     // Create the Model object
     //
+    auto res = cudaSetDevice(0);
     RTPmodel model;
     CHK_PRIME(rtpModelCreate(context, &model));
     CHK_PRIME(rtpModelSetTriangles(model, indicesDesc, verticesDesc));
@@ -445,7 +448,7 @@ const int max_depth = 50;
     // Create buffer for ray input 
     //
     RTPbufferdesc raysDesc;
-    Buffer<Ray> raysBuffer(size_t(image_width)*image_height*samples_per_pixel, bufferType, UNLOCKED); 	// unliocked here
+    Buffer<Ray> raysBuffer(size_t(image_width)*image_height*samples_per_pixel, bufferType, UNLOCKED); 	// unlocked here
     
     // vector ot vsi4ki rays
     int index = 0;
@@ -464,7 +467,7 @@ const int max_depth = 50;
                 Ray.tmax = 1e+10;
                 raysBuffer.ptr()[index] = Ray;
                 index++;
-                //pixel_color += ray_color(r, background, world, max_depth);
+                //pixel_color += rt_color(h, Ray, background, mesh);
             }
         }
     }
@@ -505,32 +508,47 @@ const int max_depth = 50;
     CHK_PRIME(rtpQuerySetHits(query, hitsDesc));
     CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
 
+    //background = color(0.70, 0.80, 1.00);
+    //std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+
 
     for (int i = 0; i < hitsBuffer.count(); i++) {
         Hit h = hitsBuffer.ptr()[i];
         Ray r = raysBuffer.ptr()[i];
-        background = color(0.70, 0.80, 1.00);
+       // color pixel_color(0.0, 0.0, 0.0);
 
-        rt_color(h, r, background, mesh);
+
+      //  pixel_color = rt_color(h, r, background, mesh);
+      //  write_rt_color(std::cout, pixel_color);
+
     }
 
+
+    // Not included TODO: my render fx();
+   
     //
     // Shade the hit results to create image
     //
    
-    std::vector<float3> image(image_width * image_height);
-    shadeHits(image, hitsBuffer, mesh);
-    writePpm("output.ppm", &image[0].x, image_width, image_height);
+    //std::vector<float3> image(image_width * image_height);
+    //shadeHits(image, hitsBuffer, mesh);
+    //writePpm("output.ppm", &image[0].x, image_width, image_height);
+
+// HERE:
+
+
+
+
 
     //
     // re-execute query with different rays
     //
     float3 extents = mesh.getBBoxMax() - mesh.getBBoxMin();
-    translateRays(raysBuffer, extents * make_float3(0.2f, 0, 0));
+    //translateRays(raysBuffer, extents * make_float3(0.2f, 0, 0));
     CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
-    shadeHits(image, hitsBuffer, mesh);
+    //shadeHits(image, hitsBuffer, mesh);
     freeMesh(mesh);
-    writePpm("outputTranslated.ppm", &image[0].x, image_width, image_height);
+    //writePpm("outputTranslated.ppm", &image[0].x, image_width, image_height);
 
 
 

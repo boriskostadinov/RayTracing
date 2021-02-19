@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,6 +39,11 @@ using namespace optix;
 //  PPMLoader class definition
 //
 //-----------------------------------------------------------------------------
+
+
+bool          PPMLoader::s_srgb2linear_initialized = false;
+unsigned char PPMLoader::s_srgb2linear[256];
+
 
 PPMLoader::PPMLoader( const std::string& filename, const bool vflip )
   : m_nx( 0u ), m_ny( 0u ), m_max_val( 0u ), m_raster( 0 ), m_is_ascii(false)
@@ -176,20 +181,8 @@ optix::TextureSampler PPMLoader::loadTexture( optix::Context context,
                                               const float3& default_color,
                                               bool linearize_gamma)
 {
-  // lookup table for sRGB gamma linearization
-  static unsigned char srgb2linear[256];
-  // filling in a static lookup table for sRGB gamma linearization, standard formula for sRGB
-  static bool srgb2linear_init = false;
-  if (!srgb2linear_init) {
-    srgb2linear_init = true;
-    for (int i = 0; i < 256; i++) {
-      float cs = i / 255.0f;
-      if (cs <= 0.04045f)
-        srgb2linear[i] = (unsigned char)(255.0f * cs / 12.92f + 0.5f);
-      else
-        srgb2linear[i] = (unsigned char)(255.0f * powf((cs + 0.055f)/1.055f, 2.4f) + 0.5f);
-    }
-  }
+  if (linearize_gamma)
+    init_srgb2linear();
 
   // Create tex sampler and populate with default values
   optix::TextureSampler sampler = context->createTextureSampler();
@@ -199,8 +192,6 @@ optix::TextureSampler PPMLoader::loadTexture( optix::Context context,
   sampler->setIndexingMode( RT_TEXTURE_INDEX_NORMALIZED_COORDINATES );
   sampler->setReadMode( RT_TEXTURE_READ_NORMALIZED_FLOAT );
   sampler->setMaxAnisotropy( 1.0f );
-  sampler->setMipLevelCount( 1u );
-  sampler->setArraySize( 1u );
 
   if (failed() ) {
 
@@ -213,7 +204,7 @@ optix::TextureSampler PPMLoader::loadTexture( optix::Context context,
     buffer_data[3] = 255;
     buffer->unmap();
 
-    sampler->setBuffer( 0u, 0u, buffer );
+    sampler->setBuffer( buffer );
     // Although it would be possible to use nearest filtering here, we chose linear
     // to be consistent with the textures that have been loaded from a file. This
     // allows OptiX to perform some optimizations.
@@ -239,9 +230,9 @@ optix::TextureSampler PPMLoader::loadTexture( optix::Context context,
       buffer_data[ buf_index + 1 ] = raster()[ ppm_index + 1 ];
       buffer_data[ buf_index + 2 ] = raster()[ ppm_index + 2 ];
       if (linearize_gamma) {
-        buffer_data[ buf_index + 0 ] = srgb2linear[buffer_data[ buf_index + 0 ]];
-        buffer_data[ buf_index + 1 ] = srgb2linear[buffer_data[ buf_index + 1 ]];
-        buffer_data[ buf_index + 2 ] = srgb2linear[buffer_data[ buf_index + 2 ]];
+        buffer_data[ buf_index + 0 ] = s_srgb2linear[buffer_data[ buf_index + 0 ]];
+        buffer_data[ buf_index + 1 ] = s_srgb2linear[buffer_data[ buf_index + 1 ]];
+        buffer_data[ buf_index + 2 ] = s_srgb2linear[buffer_data[ buf_index + 2 ]];
       }
       buffer_data[ buf_index + 3 ] = 255;
     }
@@ -249,13 +240,76 @@ optix::TextureSampler PPMLoader::loadTexture( optix::Context context,
 
   buffer->unmap();
 
-  sampler->setBuffer( 0u, 0u, buffer );
+  sampler->setBuffer( buffer );
   sampler->setFilteringModes( RT_FILTER_LINEAR, RT_FILTER_LINEAR, RT_FILTER_NONE );
 
   return sampler;
 }
 
-  
+
+void PPMLoader::init_srgb2linear()
+{
+    if( s_srgb2linear_initialized )
+        return;
+
+    // filling in a static lookup table for sRGB gamma linearization, standard formula for sRGB
+    s_srgb2linear_initialized = true;
+    for( int i = 0; i < 256; i++ )
+    {
+        float cs = i / 255.0f;
+        if( cs <= 0.04045f )
+            s_srgb2linear[i] = (unsigned char)( 255.0f * cs / 12.92f + 0.5f );
+        else
+            s_srgb2linear[i] = (unsigned char)( 255.0f * powf( ( cs + 0.055f ) / 1.055f, 2.4f ) + 0.5f );
+    }
+}
+
+optix::Buffer PPMLoader::loadFloat4Buffer( optix::Context context, bool linearize_gamma )
+{
+    if( failed() )
+        return 0;
+
+    if (linearize_gamma)
+        init_srgb2linear();
+
+    const unsigned int nx = width();
+    const unsigned int ny = height();
+
+    // Create buffer and populate with PPM data.
+    optix::Buffer  buffer      = context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, nx, ny );
+    optix::float4* buffer_data = static_cast<optix::float4*>( buffer->map() );
+
+    for( unsigned int i = 0; i < nx; ++i )
+    {
+        for( unsigned int j = 0; j < ny; ++j )
+        {
+            unsigned int ppm_index = ( ( ny - j - 1 ) * nx + i ) * 3;
+            unsigned int buf_index = ( j * nx + i );
+
+            if( linearize_gamma )
+            {
+                buffer_data[buf_index].x = s_srgb2linear[raster()[ppm_index + 0]];
+                buffer_data[buf_index].y = s_srgb2linear[raster()[ppm_index + 1]];
+                buffer_data[buf_index].z = s_srgb2linear[raster()[ppm_index + 2]];
+            }
+            else
+            {
+                buffer_data[buf_index].x = raster()[ppm_index + 0];
+                buffer_data[buf_index].y = raster()[ppm_index + 1];
+                buffer_data[buf_index].z = raster()[ppm_index + 2];
+            }
+            buffer_data[buf_index].w = 255.f;
+
+            buffer_data[buf_index] *= (1.f / 255.f);
+        }
+    }
+
+    buffer->unmap();
+
+    return buffer;
+}
+
+
 //-----------------------------------------------------------------------------
 //  
 //  Utility functions 
@@ -303,7 +357,7 @@ optix::Buffer loadPPMCubeBuffer( optix::Context context,
         buffer_data[ buf_index + 0 ] = ppm.raster()[ ppm_index + 0 ];
         buffer_data[ buf_index + 1 ] = ppm.raster()[ ppm_index + 1 ];
         buffer_data[ buf_index + 2 ] = ppm.raster()[ ppm_index + 2 ];
-        buffer_data[ buf_index + 3 ] = ppm.raster()[ ppm_index + 3 ];
+        buffer_data[ buf_index + 3 ] = (char) ~0;
       }
     }
 

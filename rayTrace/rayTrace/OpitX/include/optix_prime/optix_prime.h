@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and
  * proprietary rights in and to this software, related documentation and any
@@ -31,7 +31,7 @@
 #ifndef __optix_optix_prime_h__
 #define __optix_optix_prime_h__
 
-#define OPTIX_PRIME_VERSION 40101  /* major =  OPTIX_PRIME_VERSION/10000,        *
+#define OPTIX_PRIME_VERSION 60500  /* major =  OPTIX_PRIME_VERSION/10000,        *
                                     * minor = (OPTIX_PRIME_VERSION%10000)/100,   *
                                     * micro =  OPTIX_PRIME_VERSION%100           */
 
@@ -95,11 +95,10 @@ extern "C" {
    * @ingroup Prime_Context
    *
    * By default, a context created with type @ref RTP_CONTEXT_TYPE_CUDA will
-   * use all available CUDA devices.  Specific devices can be selected using
-   * @ref rtpContextSetCudaDeviceNumbers. One device will be selected
-   * as the *primary device* and will be set as the current device when the
-   * function returns. If no available device has compute capability 2.0 or greater
-   * the created context will not be able to build acceleration structures.
+   * use the fastest available CUDA device, but note that specific devices can be selected using
+   * @ref rtpContextSetCudaDeviceNumbers. The fastest device will be set as the current device when the
+   * function returns. If no CUDA device features compute capability 3.0 or greater,
+   * the context creation will fail unless RTP_CONTEXT_TYPE_CPU was specified.
    *
    * @param[in]  type       The type of context to create
    * @param[out] context    Pointer to the new OptiX Prime context
@@ -131,11 +130,12 @@ extern "C" {
    *
    * @ingroup Prime_Context
    *
-   * The first device provided in deviceNumbers will be used as the *primary
-   * device*.  Acceleration structures will be built on the primary device and 
-   * copied to the others. To build the acceleration structures the primary
-   * device must be of compute capability 2.0 or greater. The current device
-   * will be set to the primary device when this function returns.
+   * The fastest device provided in deviceNumbers will be used as the *primary
+   * device*. Acceleration structures will be built on that primary device and 
+   * copied to the others. All devices must be of compute capability 3.0 or greater.
+   * Note that this distribution can be rather costly if the rays are stored in device memory though.
+   * For maximum efficiency it is recommended to only ever select one device per context.
+   * The current device will be set to the primary device when this function returns.
    *
    * If \a deviceCount==0, then the primary device is selected automatically and
    * all available devices are selected for use. \a deviceNumbers is ignored.

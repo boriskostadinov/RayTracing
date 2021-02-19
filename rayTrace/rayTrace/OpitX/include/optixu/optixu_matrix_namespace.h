@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2008 - 2010 NVIDIA Corporation.  All rights reserved.
+ * Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA Corporation and its licensors retain all intellectual property and proprietary
  * rights in and to this software, related documentation and any modifications thereto.
@@ -53,6 +53,8 @@ namespace optix {
   template <unsigned int M, unsigned int N> class Matrix;
 
    template <unsigned int M> OPTIXU_INLINE RT_HOSTDEVICE Matrix<M,M>& operator*=(Matrix<M,M>& m1, const Matrix<M,M>& m2);
+   RT_MAT_DECL OPTIXU_INLINE RT_HOSTDEVICE bool         operator==(const Matrix<M,N>& m1, const Matrix<M,N>& m2);
+   RT_MAT_DECL OPTIXU_INLINE RT_HOSTDEVICE bool         operator!=(const Matrix<M,N>& m1, const Matrix<M,N>& m2);
    RT_MAT_DECL OPTIXU_INLINE RT_HOSTDEVICE Matrix<M,N>& operator-=(Matrix<M,N>& m1, const Matrix<M,N>& m2);
    RT_MAT_DECL OPTIXU_INLINE RT_HOSTDEVICE Matrix<M,N>& operator+=(Matrix<M,N>& m1, const Matrix<M,N>& m2);
    RT_MAT_DECL OPTIXU_INLINE RT_HOSTDEVICE Matrix<M,N>& operator*=(Matrix<M,N>& m1, float f);
@@ -103,7 +105,7 @@ namespace optix {
     typedef typename VectorDim<N>::VectorType  floatN; /// A row of the matrix
     typedef typename VectorDim<M>::VectorType  floatM; /// A column of the matrix
 
-	/** Create an unitialized matrix */
+	/** Create an uninitialized matrix */
 	RT_HOSTDEVICE              Matrix();
 
 	/** Create a matrix from the specified float array */
@@ -265,6 +267,23 @@ namespace optix {
       RT_MATRIX_ACCESS( m_data, i, n ) = v[i];
   }
 
+
+  // Compare two matrices using exact float comparison
+  template<unsigned int M, unsigned int N>
+  RT_HOSTDEVICE bool operator==(const Matrix<M,N>& m1, const Matrix<M,N>& m2)
+  {
+    for ( unsigned int i = 0; i < M*N; ++i )
+      if ( m1[i] != m2[i] ) return false;
+    return true;
+  }
+
+  template<unsigned int M, unsigned int N>
+  RT_HOSTDEVICE bool operator!=(const Matrix<M,N>& m1, const Matrix<M,N>& m2)
+  {
+    for ( unsigned int i = 0; i < M*N; ++i )
+      if ( m1[i] != m2[i] ) return true;
+    return false;
+  }
 
   // Subtract two matrices of the same size.
   template<unsigned int M, unsigned int N>
