@@ -1,7 +1,7 @@
 ﻿  main.cpp
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(19,1): warning C4005: 'NOMINMAX': macro redefinition
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(24,1): warning C4005: 'NOMINMAX': macro redefinition
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp : message : see previous definition of 'NOMINMAX'
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(84,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(85,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(86,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(89,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(90,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(91,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   rayTrace.vcxproj -> D:\RayTracing\RayTracing\rayTrace\x64\Debug\rayTrace.exe

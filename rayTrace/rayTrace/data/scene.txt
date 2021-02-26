@@ -1,0 +1,59 @@
+Mesh {
+	no
+	D:/RayTracing/RayTracing/rayTrace/rayTrace/data/cow.obj
+
+}
+
+
+GlobalSettings {
+	aspect_ratio		16.0 / 9.0
+	image_width		400
+	samples_per_pixel	400
+	max_depth		50
+	background		( 0.5, 0.5, 0.7 )
+}
+
+
+
+Camera {
+	lookfrom 	( 13 2 3 )
+	lookat 		( 0 1 0 )
+	vup 		( 0 1 0 )
+	vfov 		30.0
+	aperture 	0.0
+	dist_to_focus 	10.0
+}
+
+Objects {
+	__red	lambertian 	( 1.0, 0.0, 0.0 )
+	sphere ( 0 2 -2.5 ) 1 
+
+	__green	lambertian 	( 0.1, 0.5, 0.1 )
+	sphere ( 0 -0.5 0 ) 1	
+
+	__grey 	metal 		( 0.8, 0.8, 0.8 ) 0.1
+	sphere ( -1 -1 -2 ) 1
+
+	__gold	metal 		( 0.8, 0.6, 0.2 ) 1.0
+	sphere ( 0 2 0 ) 1 
+
+	__glass	dielectric	1.5
+	sphere ( 2 2 2 ) 1 
+
+	__lightBulb diffuse_light ( 8 8 8 )
+	sphere ( 5 5 5 ) 1 
+
+
+	__brown	lambertian 	( 0.6, 0.3, 0.1 )
+	sphere ( 0 -1001 -0 ) 1000 
+
+
+}
+
+
+__TODO_below:
+Textures {
+	texture1 	earthmap.jpg
+	texture2 	mars.jpg
+
+}
