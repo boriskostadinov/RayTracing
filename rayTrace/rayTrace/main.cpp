@@ -15,6 +15,8 @@ using namespace std;
 #include "moving_sphere.h"
 #include "sphere.h"
 #include "aarect.h"
+#include "box.h"
+
 
 #include <iostream>
 #include <map>
@@ -504,6 +506,81 @@ int main() {
 
 
                     }
+                    if (words[checker] == "yz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<yz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xy_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xy_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "box") {
+                        checker++;
+                        checker++;
+                        double p1X = std::stod(words[checker]);
+                        checker++;
+                        double p1Y = std::stod(words[checker]);
+                        checker++;
+                        double p1Z = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+                        checker++;
+                        double p2X = std::stod(words[checker]);
+                        checker++;
+                        double p2Y = std::stod(words[checker]);
+                        checker++;
+                        double p2Z = std::stod(words[checker]);
+                        checker++;
+
+                        objects.add(make_shared<box>(point3(p1X, p1Y, p1Z), point3(p2X, p2Y, p2Z), matherial));
+
+                    }
 
                     //objects.add(make_shared<sphere>(point3(0, -10, 0), 10, make_shared<lambertian>(checker)));
 
@@ -542,7 +619,81 @@ int main() {
                         objects.add(make_shared<sphere>(point3(X1, Y1, Z1), R1, matherial));
 
                     }
+                    if (words[checker] == "yz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
 
+                        objects.add(make_shared<yz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xy_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xy_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "box") {
+                        checker++;
+                        checker++;
+                        double p1X = std::stod(words[checker]);
+                        checker++;
+                        double p1Y = std::stod(words[checker]);
+                        checker++;
+                        double p1Z = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+                        checker++;
+                        double p2X = std::stod(words[checker]);
+                        checker++;
+                        double p2Y = std::stod(words[checker]);
+                        checker++;
+                        double p2Z = std::stod(words[checker]);
+                        checker++;
+
+                        objects.add(make_shared<box>(point3(p1X, p1Y, p1Z), point3(p2X, p2Y, p2Z), matherial));
+
+                    }
                 }
                 else if (words[checker] == "dielectric") {
                     checker++;
@@ -569,7 +720,81 @@ int main() {
 
 
                     }
+                    if (words[checker] == "yz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
 
+                        objects.add(make_shared<yz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xy_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xy_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "box") {
+                        checker++;
+                        checker++;
+                        double p1X = std::stod(words[checker]);
+                        checker++;
+                        double p1Y = std::stod(words[checker]);
+                        checker++;
+                        double p1Z = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+                        checker++;
+                        double p2X = std::stod(words[checker]);
+                        checker++;
+                        double p2Y = std::stod(words[checker]);
+                        checker++;
+                        double p2Z = std::stod(words[checker]);
+                        checker++;
+
+                        objects.add(make_shared<box>(point3(p1X, p1Y, p1Z), point3(p2X, p2Y, p2Z), matherial));
+
+                    }
                     // get dielectric refraction
                 }
                 else if (words[checker] == "diffuse_light") {
@@ -604,6 +829,81 @@ int main() {
 
                         objects.add(make_shared<sphere>(point3(X1, Y1, Z1), R1, matherial));
                     }
+                    if (words[checker] == "yz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<yz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xz_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xz_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "xy_rect") {
+                        checker++;
+                        checker++;
+                        double a = std::stod(words[checker]);
+                        checker++;
+                        double b = std::stod(words[checker]);
+                        checker++;
+                        double c = std::stod(words[checker]);
+                        checker++;
+                        double d = std::stod(words[checker]);
+                        checker++;
+                        double e = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+
+                        objects.add(make_shared<xy_rect>(a, b, c, d, e, matherial));
+
+                    }
+                    if (words[checker] == "box") {
+                        checker++;
+                        checker++;
+                        double p1X = std::stod(words[checker]);
+                        checker++;
+                        double p1Y = std::stod(words[checker]);
+                        checker++;
+                        double p1Z = std::stod(words[checker]);
+                        checker++;
+                        checker++;
+                        checker++;
+                        double p2X = std::stod(words[checker]);
+                        checker++;
+                        double p2Y = std::stod(words[checker]);
+                        checker++;
+                        double p2Z = std::stod(words[checker]);
+                        checker++;
+
+                        objects.add(make_shared<box>(point3(p1X, p1Y, p1Z), point3(p2X, p2Y, p2Z), matherial));
+
+                    }
                 }
 
             } // if "}" then we exit
@@ -622,125 +922,9 @@ int main() {
 
 
 
-    // World
-    /*hittable_list world;
-
-    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    auto material_left = make_shared<dielectric>(1.5);
-    auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
-
-
-    world.add(make_shared<sphere>(point3(0.0, -100.5, -1.0), 100.0, material_ground));
-    world.add(make_shared<sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
-    world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.4, material_left));
-    world.add(make_shared<sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
-
-    //world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
-    //world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
-    */
-    /*
-    auto R = cos(pi / 4);
-    hittable_list world;
-
-    auto material_left = make_shared<lambertian>(color(0, 0, 1));
-    auto material_right = make_shared<lambertian>(color(1, 0, 0));
-
-    world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
-    world.add(make_shared<sphere>(point3(R, 0, -1), R, material_right));
-    */
-    /*
-    hittable_list world;
-
-    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    auto material_left = make_shared<dielectric>(1.5);
-    auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 0.0);
-
-    world.add(make_shared<sphere>(point3(0.0, -100.5, -1.0), 100.0, material_ground));
-    world.add(make_shared<sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
-    world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.45, material_left));
-    world.add(make_shared<sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
-
-    //camera cam(point3(-2, 2, 1), point3(0, 0, -1), vec3(0, 1, 0), 90, aspect_ratio);
-    //camera cam(point3(-2, 2, 1), point3(0, 0, -1), vec3(0, 1, 0), 20, aspect_ratio);
-
-    point3 lookfrom(3, 3, 2);
-    point3 lookat(0, 0, -1);
-    vec3 vup(0, 1, 0);
-    auto dist_to_focus = (lookfrom - lookat).length();
-    auto aperture = 2.0;
-
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
-    */
-    //hittable_list world;
-
-
-
-    /*    switch (0) {
-    case 1:
-        world = random_scene();
-        background = color(0.70, 0.80, 1.00);
-        lookfrom = point3(13, 2, 3);
-        lookat = point3(0, 0, 0);
-        vfov = 20.0;
-        aperture = 0.1;
-        break;
-
-    case 2:
-        world = two_spheres();
-        background = color(0.70, 0.80, 1.00);
-        lookfrom = point3(13, 2, 3);
-        lookat = point3(0, 0, 0);
-        vfov = 20.0;
-        break;
-
-    case 4:
-        world = earth();
-        background = color(0.70, 0.80, 1.00);
-        lookfrom = point3(13, 2, 3);
-        lookat = point3(0, 0, 0);
-        vfov = 20.0;
-        break;
-
-    case 5:
-        world = simple_light();
-        //samples_per_pixel = 400;
-        background = color(0, 0, 0);
-        lookfrom = point3(26, 3, 6);
-        lookat = point3(0, 2, 0);
-        vfov = 20.0;
-        break;
-    default:
-        break;
-
-    }
-*/
-
-    // Camera
-    /*auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
-
-    auto origin = point3(0, 0, 0);
-    auto horizontal = vec3(viewport_width, 0, 0);
-    auto vertical = vec3(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focal_length);
-    */
-     /*
-    point3 lookfrom(13, 2, 3);
-    point3 lookat(0, 0, 0);
-    vec3 vup(0, 1, 0);
-    auto dist_to_focus = 10.0;
-    auto aperture = 0.1;
-    int image_height = static_cast<int>(image_width / aspect_ratio);
-
-    camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
-*/
     
-    //int image_height = static_cast<int>(image_width / aspect_ratio);
+ 
+    
 
     // OptiX Works here if there is a valid mesh loaded from scene
     if (meshIncluded) {
@@ -972,30 +1156,7 @@ int main() {
 
 
 
-    // Render without a Mesh
-        /*
-
-        // Outpitting the result directly into ppm file
-        //file << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-        //write_color(std::cout, pixel_color);  must be into file << pixel_color;
-        //file.close();
-
-        for (int j = image_height - 1; j >= 0; --j) {
-            //    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-            for (int i = 0; i < image_width; ++i) {
-                color pixel_color(0, 0, 0);
-                for (int s = 0; s < samples_per_pixel; ++s) {
-                    auto u = (i + random_double()) / (image_width - 1);
-                    auto v = (j + random_double()) / (image_height - 1);
-                    ray r = cam.get_ray(u, v);
-                    pixel_color += ray_color(r, background, world, max_depth);
-                }
-                write_color(std::cout, pixel_color, samples_per_pixel);
-            }
-        }
-
-        // std::cerr << "\nDone.\n";
-        */
+    
     }
     
 }
