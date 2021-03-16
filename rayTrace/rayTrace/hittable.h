@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ray.h"
-#include "rtweekend.h"
+#include "rtconst.h"
 #include "aabb.h"
 
 

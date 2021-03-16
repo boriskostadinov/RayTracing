@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rtweekend.h"
+#include "rtconst.h"
 #include "texture.h"
 
 

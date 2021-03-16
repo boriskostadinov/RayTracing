@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "rtweekend.h"
+#include "rtconst.h"
 
 #include "hittable.h"
 #include "hittable_list.h"

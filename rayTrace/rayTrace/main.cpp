@@ -7,7 +7,7 @@
 #include<cstdlib>
 using namespace std;
 
-#include "rtweekend.h"
+#include "rtconst.h"
 #include "camera.h"
 #include "color.h"
 #include "hittable_list.h"
@@ -292,7 +292,7 @@ int main() {
     }
 
     std::string word;
-    std::string words[255];
+    std::string words[255]; // 255 is enough for now
     int wordcount = 0;
 
     textscene >> word;
@@ -997,7 +997,9 @@ int main() {
         RTPmodel model;
         CHK_PRIME(rtpModelCreate(context, &model));
         CHK_PRIME(rtpModelSetTriangles(model, indicesDesc, verticesDesc));
-        CHK_PRIME(rtpModelUpdate(model, 0));
+        CHK_PRIME(rtpModelUpdate(model, RTP_MODEL_HINT_ASYNC));
+
+
 
         //
         // Create buffer for ray input 
@@ -1005,7 +1007,7 @@ int main() {
         RTPbufferdesc raysDesc;
         Buffer<Ray> raysBuffer(size_t(image_width) * image_height * samples_per_pixel, bufferType, UNLOCKED); 	// unlocked here
 
-        // vector ot vsi4ki rays
+        // Vector of all rays
         int index = 0;
         for (int j = image_height - 1; j >= 0; --j) {
             for (int i = 0; i < image_width; ++i) {
@@ -1015,7 +1017,6 @@ int main() {
                     auto v = (j + random_double()) / (image_height - 1);
                     ray r = cam.get_ray(u, v);
                     Ray Ray;
-
                     Ray.dir = make_float3(unit_vector(r.dir));
                     Ray.origin = make_float3(r.orig);
                     Ray.tmin = 0;
@@ -1062,9 +1063,6 @@ int main() {
         CHK_PRIME(rtpQuerySetRays(query, raysDesc));
         CHK_PRIME(rtpQuerySetHits(query, hitsDesc));
         CHK_PRIME(rtpQueryExecute(query, 0 /* hints */));
-
-        //background = color(0.70, 0.80, 1.00);
-        //std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 
 
         for (int i = 0; i < hitsBuffer.count(); i++) {
@@ -1123,7 +1121,7 @@ int main() {
         // cleanup
         //
         CHK_PRIME(rtpContextDestroy(context));
-        // at bottom! 
+        // ending 
 
     }
 
@@ -1135,12 +1133,10 @@ int main() {
         camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
 
-        //std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
         std::ofstream file("image234.ppm", std::ios::out);
         file << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
         for (int j = image_height - 1; j >= 0; --j) {
-            //    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
             for (int i = 0; i < image_width; ++i) {
                 color pixel_color(0, 0, 0);
                 for (int s = 0; s < samples_per_pixel; ++s) {

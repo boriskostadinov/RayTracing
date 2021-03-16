@@ -1,5 +1,5 @@
-#ifndef RTWEEKEND_STB_IMAGE_H
-#define RTWEEKEND_STB_IMAGE_H
+#ifndef rtconst_STB_IMAGE_H
+#define rtconst_STB_IMAGE_H
 
 // Disable pedantic warnings for this external library.
 #ifdef _MSC_VER

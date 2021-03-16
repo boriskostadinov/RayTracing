@@ -113,14 +113,7 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 inline vec3 unit_vector(vec3 v) {
     return v / v.length();
 }
-/*
-inline static vec3 random() {
-    return vec3(random_double(), random_double(), random_double());
-}
-//
-inline static vec3 random(double min, double max) {
-    return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
-}*/
+
 
 vec3 random_in_unit_sphere() {
     while (true) {

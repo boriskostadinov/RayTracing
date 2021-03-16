@@ -4,9 +4,8 @@ D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp : message : see previous def
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(91,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(92,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\RayTracing\RayTracing\rayTrace\rayTrace\main.cpp(93,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  Generating code
-  1 of 1771 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    4 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  rayTrace.vcxproj -> D:\RayTracing\RayTracing\rayTrace\x64\Release\rayTrace.exe
+  Mesh.cpp
+  tiny_obj_loader.cc
+  Generating Code...
+  rply.c
+  rayTrace.vcxproj -> D:\RayTracing\RayTracing\rayTrace\x64\Debug\rayTrace.exe

@@ -168,7 +168,7 @@
     <ClInclude Include="material.h" />
     <ClInclude Include="moving_sphere.h" />
     <ClInclude Include="ray.h" />
-    <ClInclude Include="rtweekend.h" />
+    <ClInclude Include="rtconst.h" />
     <ClInclude Include="rtw_stb_image.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="stb_image.h" />
