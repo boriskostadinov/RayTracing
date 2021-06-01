@@ -55,9 +55,3 @@ Objects {
 }
 
 
-__TODO_below:
-Textures {
-	texture1 	earthmap.jpg
-	texture2 	mars.jpg
-
-}
